@@ -1,65 +1,71 @@
 #include <iostream>
+#include <fstream>
 using namespace std;
 
-// Función para rotar bits a la derecha
-unsigned char rotarDerecha(unsigned char valor, int n) {
+// Funciones para desencriptar el archivo txt
+unsigned char bits_derecha(unsigned char valor, int n) {
     return (valor >> n) | (valor << (8 - n));
 }
+unsigned char XOR_char(char x){
+    return x ^ 0x5A;
+}
+
 
 int main() {
-    // Paso 1: Arreglo original dinámico
-    int n = 9;
-    char* arr = new char[n]{'r','r','e','n','o','s','d','e','s'};
+    //Abrir el archivo y verificar que se abra correctamente
+    ifstream archivo("Encriptado1.txt");
 
-    // Paso 2: RLE - Contar repeticiones
-    int maxTam = n * 2; // como máximo, cada letra con su conteo
-    char* letras = new char[maxTam];
-    int* conteo = new int[maxTam];
-    int k = 0;
+    if (!archivo.is_open()){
+        cout<<"Error al abrir el archivo"<<endl;
+        return 1;
+    }
+    else
+        cout<<"Se abrio correctamente el archivo"<<endl;
 
-    for (int i = 0; i < n; ) {
-        char actual = arr[i];
-        int count = 1;
-        while (i + 1 < n && arr[i+1] == actual) {
-            count++;
-            i++;
+    //Leer contenido del archivo y descartar LZ,espacios, saltos de línea, y tabulaciones
+    char letra;
+    int cont = 0;
+
+    //Con este while obtenemos el tamaño del próximo arreglo dinámico
+    while (archivo.get(letra)){
+        if (letra != ' ' && letra != '\n' && letra != '\t' && letra != 'Z' && letra != 'R'){
+            cont++;
         }
-        letras[k] = actual;
-        conteo[k] = count;
-        k++;
-        i++;
     }
 
-    // Paso 3: Mostrar RLE original
-    cout << "RLE original:" << endl;
-    for (int i = 0; i < k; i++) {
-        cout << conteo[i] << letras[i] << " ";
+    archivo.clear();
+    archivo.seekg(0); //Para que la extracción comience el posición 0 del archivo
+
+    char* letras = new char[cont + 1];
+    int indice = 0;
+
+    while (archivo.get(letra)){
+        if (letra != ' ' && letra != '\n' && letra != '\t' && letra != 'Z' && letra != 'R'){
+            letras[indice++] = letra;
+        }
     }
-    cout << endl << endl;
 
-    // Paso 4: Rotar 3 bits a la derecha y luego aplicar XOR con 0x5A
-    cout << "Resultado tras rotacion y XOR (ASCII):" << endl;
-    for (int i = 0; i < k; i++) {
-        // Convertimos letra a unsigned char
-        unsigned char letra = letras[i];
+    //Para  arreglos de caracteres en la última posición se debe almacenar el caracter nulo----"Se consultó con el profe"
+    letras[indice] = '\0';
 
-        // Rotacion 3 bits derecha
-        unsigned char rotada = letra ^ 0x5A;
+    archivo.close(); //Ya obtuve los datos del archivo, entonces lo cierro.
 
-        // XOR con 0x5A
-        unsigned char resultado =  rotarDerecha(letra, 3);
+    //Proceso de desencriptación del archivo Encriptado1.txt
 
-
-
-        // Imprimir: cantidad + caracter transformado
-        cout << conteo[i] << (char)resultado << " ";
+    cout<<"El mensaje desencriptado es:"<<endl;
+    for (int i = 0;i < cont;++i){
+        letras[i] = XOR_char(letras[i]);
+        char letra_xoreada = letras[i];
+        char l_rotada = bits_derecha(letra_xoreada,3);
+        char letra_final = l_rotada;
+        cout<<letra_final;
     }
-    cout << endl;
 
-    // Liberar memoria
-    delete[] arr;
-    delete[] letras;
-    delete[] conteo;
+    cout<<endl;
+    delete[]letras;
+
+
+
 
     return 0;
 }
