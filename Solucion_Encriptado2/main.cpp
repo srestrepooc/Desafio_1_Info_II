@@ -18,13 +18,13 @@ char convertir_a_char(int valor){
 // Recibe el segundo elemento de la tripleta
 int convertir_a_int(int valor){
     unsigned char val = (unsigned char)valor;
-    val = val ^ 0x5A;
+    val = val ^ 0x40;
     val = rotarDer(val,3);
     return (int)val;
 }
 
 int main() {
-    ifstream archivo("Encriptado2.txt", ios::binary);
+    ifstream archivo("Encriptado4.txt", ios::binary);
     if (!archivo.is_open()){
         cout<<"No se pudo abrir el archivo."<<endl;
         return 1;
